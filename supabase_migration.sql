@@ -67,17 +67,29 @@ CREATE TABLE IF NOT EXISTS public.blocked_senders (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. Triggers for updated_at
+-- 6. fraud_log table
+CREATE TABLE IF NOT EXISTS public.fraud_log (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    url TEXT NOT NULL,
+    risk_level TEXT NOT NULL CHECK (risk_level IN ('low', 'medium', 'high', 'critical')),
+    threat_type TEXT NOT NULL,
+    explanation TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 7. Triggers for updated_at
 CREATE TRIGGER tr_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER tr_scan_history_updated_at BEFORE UPDATE ON public.scan_history FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER tr_family_alerts_updated_at BEFORE UPDATE ON public.family_alerts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER tr_blocked_senders_updated_at BEFORE UPDATE ON public.blocked_senders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- 7. Security: Enable RLS
+-- 8. Security: Enable RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.scan_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.family_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.blocked_senders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.fraud_log ENABLE ROW LEVEL SECURITY;
 
 -- 8. Policies: profiles
 CREATE POLICY "Users read own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
@@ -98,6 +110,12 @@ CREATE POLICY "Seniors read own alerts" ON public.family_alerts FOR SELECT USING
 -- 11. Policies: blocked_senders
 CREATE POLICY "Guardians manage blocked lists" ON public.blocked_senders FOR ALL USING (auth.uid() = blocked_by);
 CREATE POLICY "Seniors read their blocked list" ON public.blocked_senders FOR SELECT USING (auth.uid() = senior_id);
+
+-- 12. Policies: fraud_log
+CREATE POLICY "Users manage own fraud logs" ON public.fraud_log FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Guardians read linked seniors fraud logs" ON public.fraud_log FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = public.fraud_log.user_id AND guardian_id = auth.uid())
+);
 
 -- 12. Indexes
 CREATE INDEX idx_profiles_guardian ON public.profiles(guardian_id);

@@ -7,6 +7,7 @@ import { translations, AppLanguage } from './constants/translations';
 import { FamilyShield } from './components/FamilyShield';
 import { SettingsView } from './components/SettingsView';
 import { NotificationSystem } from './components/NotificationSystem';
+import { URLScanner } from './components/URLScanner';
 import { AuthPage } from './components/AuthPage';
 import { ResetPasswordPage } from './components/ResetPasswordPage';
 import AuthCallbackPage from './components/AuthCallbackPage';
@@ -351,7 +352,7 @@ function Dashboard({ user, profile, language, setLanguage, theme, setTheme }: an
     }
   });
   const [history, setHistory] = useState<ScanHistoryItem[]>([]);
-  const [activeTab, setActiveTab] = useState<'scanner' | 'history' | 'family' | 'settings'>('scanner');
+  const [activeTab, setActiveTab] = useState<'scanner' | 'url-scanner' | 'history' | 'family' | 'settings'>('scanner');
   const [showModal, setShowModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [modalData, setModalData] = useState<ScanResult | null>(null);
@@ -547,6 +548,7 @@ function Dashboard({ user, profile, language, setLanguage, theme, setTheme }: an
 
   const tabs = [
     { id: 'scanner', icon: Shield, label: language === 'Arabic' ? 'الفحص' : 'Scanner' },
+    { id: 'url-scanner', icon: ShieldAlert, label: language === 'Arabic' ? 'الروابط' : 'URL Check' },
     { id: 'history', icon: History, label: language === 'Arabic' ? 'التنبيهات' : 'History' },
     { id: 'family', icon: Users, label: language === 'Arabic' ? 'العائلة' : 'Family' },
     { id: 'settings', icon: Settings, label: language === 'Arabic' ? 'الإعدادات' : 'Settings' }
@@ -870,6 +872,18 @@ function Dashboard({ user, profile, language, setLanguage, theme, setTheme }: an
                 className="space-y-6"
               >
                 <ScanHistory language={uiLanguage} history={history} setHistory={setHistory} t={t} isRTL={isRTL} theme={theme} getRiskColor={getRiskColor} getRiskIcon={getRiskIcon} openModal={openModal} clearHistory={clearHistory} exportToCSV={exportToCSV} />
+              </motion.div>
+            )}
+
+            {activeTab === 'url-scanner' && (
+              <motion.div
+                key="url-scanner"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <URLScanner language={uiLanguage} theme={theme} />
               </motion.div>
             )}
 

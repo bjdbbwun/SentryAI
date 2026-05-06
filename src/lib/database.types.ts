@@ -162,6 +162,35 @@ export interface Database {
           updated_at?: string
         }
       }
+      fraud_log: {
+        Row: {
+          id: string
+          user_id: string
+          url: string
+          risk_level: RiskLevel
+          threat_type: string
+          explanation: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          url: string
+          risk_level: RiskLevel
+          threat_type: string
+          explanation: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          url?: string
+          risk_level?: RiskLevel
+          threat_type?: string
+          explanation?: string
+          created_at?: string
+        }
+      }
     }
   }
 }
@@ -170,3 +199,4 @@ export type Profile = Database['public']['Tables']['profiles']['Row']
 export type ScanHistory = Database['public']['Tables']['scan_history']['Row']
 export type FamilyAlert = Database['public']['Tables']['family_alerts']['Row']
 export type BlockedSender = Database['public']['Tables']['blocked_senders']['Row']
+export type FraudLog = Database['public']['Tables']['fraud_log']['Row']

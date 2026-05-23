@@ -1,0 +1,75 @@
+// src/orchestrator.ts
+// Master Orchestrator - All Layers Combined
+
+import { fastScan } from './fastScan';
+import { reputationScan } from './reputation';
+import { behaviorScan } from './behavior';
+
+export interface FinalResult {
+  finalScore: number;
+  finalVerdict: 'safe' | 'suspicious' | 'dangerous' | 'blocked';
+  summary: string[];
+  recommendation: string;
+}
+
+export async function fullScan(url: string, pageContent?: string): Promise<FinalResult> {
+  const summary: string[] = [];
+  let totalScore = 0;
+  let layersRun = 0;
+  
+  // Layer 1+2
+  const fast = await fastScan(url);
+  totalScore += fast.score;
+  layersRun++;
+  summary.push(`Fast scan: ${fast.score}% - ${fast.reasons.join(', ')}`);
+  
+  if (fast.score < 30) {
+    return {
+      finalScore: fast.score,
+      finalVerdict: 'blocked',
+      summary: [...summary, 'BLOCKED: High risk detected'],
+      recommendation: 'Do not open this link'
+    };
+  }
+  
+  // Layer 3
+  const reputation = await reputationScan(url);
+  totalScore += reputation.score;
+  layersRun++;
+  summary.push(`Reputation: ${reputation.score}%`);
+  
+  // Layer 4
+  let behavior = null;
+  if (pageContent) {
+    behavior = await behaviorScan(url, pageContent);
+    totalScore += behavior.score;
+    layersRun++;
+    summary.push(`Behavioral: ${behavior.score}%`);
+  }
+  
+  const finalScore = Math.round(totalScore / layersRun);
+  
+  let finalVerdict: 'safe' | 'suspicious' | 'dangerous' | 'blocked';
+  let recommendation = '';
+  
+  if (finalScore >= 80) {
+    finalVerdict = 'safe';
+    recommendation = '✓ Link appears safe';
+  } else if (finalScore >= 50) {
+    finalVerdict = 'suspicious';
+    recommendation = '⚠️ Suspicious link, be careful';
+  } else if (finalScore >= 25) {
+    finalVerdict = 'dangerous';
+    recommendation = '🚨 Dangerous link, do not proceed';
+  } else {
+    finalVerdict = 'blocked';
+    recommendation = '❌ Link blocked - confirmed fraud';
+  }
+  
+  return { finalScore, finalVerdict, summary, recommendation };
+}
+
+export async function quickCheck(url: string): Promise<string> {
+  const result = await fullScan(url);
+  return `[${result.finalVerdict.toUpperCase()}] ${result.recommendation} (${result.finalScore}%)`;
+}

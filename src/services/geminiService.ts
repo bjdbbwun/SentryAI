@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export interface ScanResult {
   risk: "High" | "Medium" | "Low";
@@ -102,8 +102,7 @@ export async function scanText(text: string, preferredLanguage: string = "Auto")
   });
 
   try {
-    const text = response?.text || "{}";
-    const result = JSON.parse(text.trim());
+    const result = JSON.parse(response.text.trim());
     return result as ScanResult;
   } catch (error) {
     console.error("Failed to parse Gemini response:", error);
@@ -151,11 +150,5 @@ export async function familyGuardianAnalysis(seniorName: string, recentThreats: 
     contents: prompt,
   });
 
-  try {
-    const text = response?.text || "";
-    return text.trim();
-  } catch (error) {
-    console.error("Failed to get Gemini response text:", error);
-    return "Unable to generate family report due to technical error.";
-  }
+  return response.text.trim();
 }

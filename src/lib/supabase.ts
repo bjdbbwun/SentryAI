@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl ='https://hiyaggqmnshuaypafucu.supabase.co' ;
+const supabaseAnonKey ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpeWFnZ3FtbnNodWF5cGFmdWN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MjQzMDMsImV4cCI6MjA5MzUwMDMwM30.XeCvj9UkgEnuTH7PpS_KRMKEtH0E1hg2wIhkR6SPk9k' ;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(

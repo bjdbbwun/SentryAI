@@ -1,0 +1,55 @@
+// src/behavior.ts
+// Layer 4: Behavioral Analysis
+
+export interface BehaviorResult {
+  score: number;
+  hasLoginForm: boolean;
+  requestsPassword: boolean;
+  suspiciousWords: string[];
+  urgencyLevel: 'low' | 'medium' | 'high';
+}
+
+const urgencyPhrases = ['immediately', 'urgent', 'within 24 hours', 'verify now', 'suspend', 'account will be closed'];
+const passwordWords = ['password', 'passcode', 'security key'];
+const loginWords = ['login', 'signin', 'log in'];
+
+function analyzeUrgency(text: string): 'low' | 'medium' | 'high' {
+  const lower = text.toLowerCase();
+  let count = urgencyPhrases.filter(p => lower.includes(p)).length;
+  if (count >= 3) return 'high';
+  if (count >= 1) return 'medium';
+  return 'low';
+}
+
+function findSuspiciousWords(text: string): string[] {
+  const lower = text.toLowerCase();
+  const found: string[] = [];
+  if (passwordWords.some(w => lower.includes(w))) found.push('password request');
+  if (loginWords.some(w => lower.includes(w))) found.push('login form');
+  if (lower.includes('credit card')) found.push('credit card request');
+  return found;
+}
+
+export async function behaviorScan(url: string, pageContent?: string): Promise<BehaviorResult> {
+  let score = 100;
+  const suspiciousWords: string[] = [];
+  
+  if (pageContent) {
+    const urgency = analyzeUrgency(pageContent);
+    const words = findSuspiciousWords(pageContent);
+    suspiciousWords.push(...words);
+    
+    if (urgency === 'high') score -= 40;
+    else if (urgency === 'medium') score -= 20;
+    
+    score -= words.length * 15;
+  }
+  
+  return {
+    score: Math.max(0, Math.min(100, score)),
+    hasLoginForm: suspiciousWords.includes('login form'),
+    requestsPassword: suspiciousWords.includes('password request'),
+    suspiciousWords,
+    urgencyLevel: score < 30 ? 'high' : score < 70 ? 'medium' : 'low'
+  };
+}

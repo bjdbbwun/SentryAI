@@ -1,4 +1,4 @@
--- SentryAI Backend Configuration: PostgreSQL Schema & Security
+-- Obitrex Backend Configuration: PostgreSQL Schema & Security
 -- This script initializes the multi-tenant family protection database.
 -- Target: Supabase (PostgreSQL)
 

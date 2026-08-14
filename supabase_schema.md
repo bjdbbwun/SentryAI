@@ -1,4 +1,4 @@
-# Supabase Schema for SentryAI Family Shield
+# Supabase Schema for Obitrex Family Shield
 
 ## Tables
 

@@ -1,5 +1,5 @@
 /**
- * SentryAI - FastScan (Layers 1 + 2 - Instant Scan)
+ * Obitrex - FastScan (Layers 1 + 2 - Instant Scan)
  * Core client/server-side logic for ultra-fast, zero-cost, lightweight heuristics.
  */
 

@@ -20,7 +20,7 @@ export const NotificationSystem = ({ language, theme }: NotificationSystemProps)
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(() => {
-    return localStorage.getItem('sentry_sound_enabled') !== 'false';
+    return localStorage.getItem('obitrex_sound_enabled') !== 'false';
   });
   
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ export const NotificationSystem = ({ language, theme }: NotificationSystemProps)
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          localStorage.setItem('sentry_notifications_granted', 'true');
+          localStorage.setItem('obitrex_notifications_granted', 'true');
         }
       });
     }
@@ -127,7 +127,7 @@ export const NotificationSystem = ({ language, theme }: NotificationSystemProps)
           }
         ).subscribe((status: string) => {
           if (status === 'SUBSCRIBED') {
-            console.log(`SentryAI: Notifications channel active [${channelName}]`);
+            console.log(`Obitrex: Notifications channel active [${channelName}]`);
           }
         });
       } catch (error) {
@@ -155,7 +155,7 @@ export const NotificationSystem = ({ language, theme }: NotificationSystemProps)
   }, []); // Run only once on mount
 
   const showBrowserNotification = (alert: AlertWithSenior) => {
-    const title = language === 'Arabic' ? '🚨 تنبيه SentryAI' : '🚨 SentryAI Alert';
+    const title = language === 'Arabic' ? '🚨 تنبيه Obitrex' : '🚨 Obitrex Alert';
     const body = `${alert.senior_name} ${language === 'Arabic' ? 'تلقى رسالة خطيرة' : 'received a dangerous message'}: ${alert.message || alert.alert_type}`;
     
     const notification = new Notification(title, {
@@ -250,7 +250,7 @@ export const NotificationSystem = ({ language, theme }: NotificationSystemProps)
                   onClick={() => {
                     const newValue = !isSoundEnabled;
                     setIsSoundEnabled(newValue);
-                    localStorage.setItem('sentry_sound_enabled', String(newValue));
+                    localStorage.setItem('obitrex_sound_enabled', String(newValue));
                   }}
                   className="p-1 hover:bg-white/5 rounded-lg text-white/40 hover:text-white transition-colors"
                 >

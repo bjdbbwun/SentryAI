@@ -26,9 +26,9 @@ const AppleIcon = () => (
 
 const SentryLogo = ({ className = "" }: { className?: string }) => (
   <div className={`flex items-center gap-4 ${className}`}>
-    <img src="/image_0.png" alt="SentryAI Logo" className="h-12 object-contain" referrerPolicy="no-referrer" />
+    <img src="/image_0.png" alt="Obitrex Logo" className="h-12 object-contain" referrerPolicy="no-referrer" />
     <h1 className="text-[28px] font-bold tracking-[-0.5px] bg-gradient-to-r from-[#0070f3] to-[#00d4ff] bg-clip-text text-transparent select-none">
-      SentryAI
+      Obitrex
     </h1>
   </div>
 );
@@ -127,19 +127,29 @@ export const AuthPage = ({ language, onSuccess }: AuthPageProps) => {
     console.log(`Initializing ${provider} OAuth flow...`);
     
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const redirectTo = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '';
+      const result = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: 'https://ais-dev-th355puqfhrxm25j3g5vkl-786767627483.europe-west2.run.app/auth/callback'
+          redirectTo: `${redirectTo}`,
         }
       });
-      
-      if (error) {
-        console.error(`${provider} OAuth Error:`, error);
-        throw error;
+
+      console.log(`${provider} OAuth result:`, result);
+
+      if (result?.error) {
+        console.error(`${provider} OAuth Error:`, result.error);
+        setError(result.error.message || `Failed to initialize ${provider} login`);
+        setIsLoading(false);
+        return;
       }
-      
-      console.log(`${provider} OAuth session initiated`);
+
+      // If Supabase didn't return a redirect URL, warn the developer to check config
+      if (!result?.data || (result as any).data?.url === undefined) {
+        console.warn(`${provider} OAuth initiated but no redirect URL returned. Check Supabase OAuth redirect settings.`);
+      } else {
+        console.log(`${provider} OAuth session initiated`);
+      }
     } catch (err: any) {
       console.error(`${provider} OAuth Catch Block:`, err);
       setError(err.message || `Failed to initialize ${provider} login`);

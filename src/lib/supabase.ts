@@ -2,17 +2,18 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-const supabaseUrl ='https://hiyaggqmnshuaypafucu.supabase.co' ;
-const supabaseAnonKey ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpeWFnZ3FtbnNodWF5cGFmdWN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MjQzMDMsImV4cCI6MjA5MzUwMDMwM30.XeCvj9UkgEnuTH7PpS_KRMKEtH0E1hg2wIhkR6SPk9k' ;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'MISSING SUPABASE CREDENTIALS: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be defined in environment variables.'
+  console.warn(
+    'Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Auth features will be unavailable until .env is set.'
   );
 }
 
-// Initialize the Supabase client with strongly typed schema and persistence
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+// Initialize the Supabase client with strongly typed schema and persistence.
+// When env vars are missing, create a best-effort client so the app can still render.
+const supabase = createClient<Database>(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder-key', {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
